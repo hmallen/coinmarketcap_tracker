@@ -3,25 +3,25 @@
         "data": {
             "circulating_supply": 18580367411.0,
             "id": 512,
-            "last_updated": 1528255147,
+            "last_updated": 1528255446,
             "max_supply": null,
             "name": "Stellar",
             "quotes": {
                 "BTC": {
-                    "market_cap": 717333.0,
-                    "percent_change_1h": 0.27,
-                    "percent_change_24h": 0.04,
-                    "percent_change_7d": 1.16,
-                    "price": 3.86071e-05,
-                    "volume_24h": 6291.2547967642
+                    "market_cap": 718021.0,
+                    "percent_change_1h": 0.39,
+                    "percent_change_24h": 0.19,
+                    "percent_change_7d": 1.26,
+                    "price": 3.86441e-05,
+                    "volume_24h": 6280.1257789
                 },
                 "USD": {
-                    "market_cap": 5465879583.0,
-                    "percent_change_1h": 0.13,
-                    "percent_change_24h": 2.37,
-                    "percent_change_7d": 2.69,
-                    "price": 0.294175,
-                    "volume_24h": 47937600.0
+                    "market_cap": 5471119247.0,
+                    "percent_change_1h": 0.25,
+                    "percent_change_24h": 2.52,
+                    "percent_change_7d": 2.79,
+                    "price": 0.294457,
+                    "volume_24h": 47852800.0
                 }
             },
             "rank": 8,
@@ -31,7 +31,7 @@
         },
         "metadata": {
             "error": null,
-            "timestamp": 1528255015
+            "timestamp": 1528255199
         }
     }
 ]

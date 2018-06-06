@@ -252,7 +252,11 @@ if __name__ == '__main__':
 
         tracker_process = Process(target=cmc_tracker.track_product, kwargs=keyword_arguments)
 
+        logger.info('Starting tracker in separate process.')
+
         tracker_process.start()
+
+        logger.info('Joining process.')
 
         tracker_process.join()
 
