@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: coinmarketcap-tracker
-Version: 0.1a0
+Version: 0.1.dev0
 Summary: Tracks Coinmarketcap data for selected cryptocurrency products over time and sends Slack alerts.
 Home-page: https://github.com/hmallen/coinmarketcap_tracker
 Author: Hunter M. Allen

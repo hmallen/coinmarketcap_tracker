@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='coinmarketcap_tracker',
-    version='0.1a',
+    version='0.1dev',
     author='Hunter M. Allen',
     author_email='allenhm@gmail.com',
     license='MIT',

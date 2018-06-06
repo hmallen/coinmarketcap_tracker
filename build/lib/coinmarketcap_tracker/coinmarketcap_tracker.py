@@ -185,10 +185,6 @@ class TrackProduct:
 
 
     def send_slack_alert(self, channel_id, message, thread_id=None):
-        #alert_result = True
-
-        #alert_return = None
-
         alert_return = {'Exception': False, 'result': None}
 
         try:
@@ -208,15 +204,29 @@ class TrackProduct:
             logger.exception('Exception while sending Slack alert.')
             logger.exception(e)
 
-            #alert_result = False
             alert_return['Exception'] = True
 
         finally:
-            #return alert_result, alert_return
             return alert_return
 
 
     def track_product(self, load_data=False):
+        def compile_results(data_list):
+            results_return = {'Exception': False, 'result': ()}
+
+            try:
+                pass
+
+            except Exception as e:
+                logger.exception('Exception while compiling product tracker results.')
+                logger.exception(e)
+
+                results_return['Exception'] = True
+
+            finally:
+                return results_return
+
+
         market_data_archive = []
 
         if os.path.exists(self.cmc_data_file):
@@ -334,6 +344,8 @@ class TrackProduct:
                                                                  message=slack_message,
                                                                  thread_id=self.slack_thread)
 
+                    logger.debug('alert_result: ' + str(alert_result))
+
                     slack_message_last = time.time()
 
                 logger.debug('Sleeping for ' + str(self.loop_time) + ' seconds.')
@@ -351,7 +363,8 @@ class TrackProduct:
 
                 raise
 
-        # ANALYZE DATA
+        # Read json data from file or use current data dictionary?
+        tracker_results = compile_results(data_list=market_data_archive)
 
         # SEND SLACK ALERT
 
