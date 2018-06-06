@@ -37,7 +37,7 @@ class TrackProduct:
 
         self.slack_alerts = slack_alerts
 
-        self.slack_alert_interval = slack_alert_interval
+        self.slack_alert_interval = datetime.timedelta(minutes=slack_alert_interval).total_seconds()
 
         if self.slack_alerts == True:
             if config_path == None:
@@ -57,6 +57,10 @@ class TrackProduct:
                     self.slack_bot_user = config['settings']['slack_bot_user']
 
                     self.slack_bot_icon = config['settings']['slack_bot_icon']
+
+                    self.slack_channel_id_tracker = None
+
+                    self.slack_thread = None
 
                 except Exception as e:
                     logger.exception('Exception while initializing Slack client. Exiting.')
@@ -175,7 +179,41 @@ class TrackProduct:
             logger.info('Slack channel for tracker alerts: #' + self.slack_channel_tracker +
                         ' (' + self.slack_channel_id_tracker + ')')
 
+            self.slack_thread = slack_thread
+
         return True
+
+
+    def send_slack_alert(self, channel_id, message, thread_id=None):
+        #alert_result = True
+
+        #alert_return = None
+
+        alert_return = {'Exception': False, 'result': None}
+
+        try:
+            alert_return['result'] = self.slack_client.api_call(
+                'chat.postMessage',
+                channel=channel_id,
+                text=message,
+                username=self.slack_bot_user,
+                #icon_emoji=self.slack_bot_icon,
+                icon_url=self.slack_bot_icon,
+                thread_ts=thread_id,
+                reply_broadcast=True
+                #attachments=attachments
+            )
+
+        except Exception as e:
+            logger.exception('Exception while sending Slack alert.')
+            logger.exception(e)
+
+            #alert_result = False
+            alert_return['Exception'] = True
+
+        finally:
+            #return alert_result, alert_return
+            return alert_return
 
 
     def track_product(self, load_data=False):
@@ -202,12 +240,16 @@ class TrackProduct:
             with open(self.cmc_data_file, 'w', encoding='utf-8') as file:
                 json.dump(market_data_archive, file, indent=4, sort_keys=True, ensure_ascii=False)
 
+        slack_message_last = 0
+
         while (datetime.datetime.now() < self.track_end_time):
             try:
                 cmc_data = TrackProduct.cmc_client.ticker(currency=self.trade_product, convert=self.quote_product)
 
                 if cmc_data['metadata']['error'] == None:
-                    market_data_archive.append(cmc_data)
+                    cmc_data_product = cmc_data['data']
+
+                    market_data_archive.append(cmc_data_product)
 
                     logger.debug('Dumping Coinmarketcap data to json file.')
 
@@ -216,6 +258,83 @@ class TrackProduct:
 
                 else:
                     logger.error('Coinmarketcap return metadata indicates an error occurred. Not adding to historical data.')
+
+                    logger.error('Error: ' + str(cmc_data['metadata']['error']))
+
+                if (time.time() - slack_message_last) > self.slack_alert_interval:
+                    logger.debug('Sending Slack alert.')
+
+                    quotes_last = cmc_data_product['quotes'][self.quote_product]
+
+                    slack_message = ''
+
+                    for quote in quotes_last:
+                        quote_title_words = quote.split('_')
+
+                        quote_title = ''
+
+                        for word in quote_title_words:
+                            if word[0].isnumeric():
+                                word_modified = '(' + word + ')'
+
+                            else:
+                                word_modified = word.capitalize()
+
+                            #quote_title += word.capitalize() + ' '
+                            quote_title += word_modified + ' '
+
+                        quote_title = quote_title.rstrip(' ')
+
+                        message_line = '*' + quote_title + ':* '# + quotes_last[quote]
+
+                        if 'Volume' in quote_title:
+                            if self.quote_product == 'USD':
+                                message_line += '$' + "{:.2f}".format(quotes_last[quote])
+
+                            else:
+                                message_line += "{:.2f}".format(quotes_last[quote]) + ' ' + self.quote_product
+
+                        elif quote_title == 'Price':
+                            if self.quote_product == 'USD':
+                                message_line += '$'
+
+                                if quotes_last[quote] < 1:
+                                    message_line += "{:.4f}".format(quotes_last[quote])
+                                else:
+                                    message_line += "{:.2f}".format(quotes_last[quote])
+
+                            else:
+                                message_line += "{:.8f}".format(quotes_last[quote]) + ' ' + self.quote_product
+
+                        elif 'Percent' in quote_title:
+                            message_line += "{:.2f}".format(quotes_last[quote]) + '%'
+
+                        elif quote_title == 'Market Cap':
+                            if self.quote_product == 'USD':
+                                message_line += '$' + "{:.2f}".format(quotes_last[quote])
+
+                            else:
+                                message_line += "{:.2f}".format(quotes_last[quote]) + ' ' + self.quote_product
+
+                        else:
+                            logger.warning('Unknown quote message type.')
+
+                            logger.warning('quote: ' + quote)
+
+                            logger.warning('quote_title: ' + quote_title)
+
+                        message_line += '\n'
+
+                        slack_message += message_line
+
+                    slack_message = slack_message.rstrip('\n')
+
+                    alert_result = TrackProduct.send_slack_alert(self,
+                                                                 channel_id=self.slack_channel_id_tracker,
+                                                                 message=slack_message,
+                                                                 thread_id=self.slack_thread)
+
+                    slack_message_last = time.time()
 
                 logger.debug('Sleeping for ' + str(self.loop_time) + ' seconds.')
 
@@ -227,6 +346,15 @@ class TrackProduct:
 
                 time.sleep(5)
 
+            except KeyboardInterrupt:
+                logger.debug('Exit signal received in tracking loop. Raising exception.')
+
+                raise
+
+        # ANALYZE DATA
+
+        # SEND SLACK ALERT
+
 
 if __name__ == '__main__':
     from multiprocessing import Process
@@ -237,13 +365,13 @@ if __name__ == '__main__':
 
     #test_slack_channel_id = 'CAX1A4XU1'
 
-    cmc_tracker = TrackProduct(loop_time=30, slack_alerts=True, slack_alert_interval=5, config_path=test_config_path)
+    cmc_tracker = TrackProduct(loop_time=30, slack_alerts=True, slack_alert_interval=2, config_path=test_config_path)
 
     test_market = 'XLM/BTC'
 
     # (self, market, tracking_duration, slack_channel=None, slack_thread=None)
 
-    cmc_tracker.set_parameters(market=test_market, tracking_duration=0.2, slack_channel='testing')
+    cmc_tracker.set_parameters(market=test_market, tracking_duration=0.1, slack_channel='testing')
 
     try:
         #cmc_tracker.track_product(load_data=False)
@@ -269,4 +397,21 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         logger.info('Exit signal received.')
 
-        #sys.exit()
+        logger.info('Terminating tracker process.')
+
+        tracker_process.terminate()
+
+        logger.info('Joining terminated process to ensure clean exit.')
+
+        tracker_process.join()
+
+    finally:
+        #logger.info('Terminating tracker process.')
+
+        #tracker_process.terminate()
+
+        #logger.info('Joining terminated process to ensure clean exit.')
+
+        #tracker_process.join()
+
+        logger.info('Done.')
