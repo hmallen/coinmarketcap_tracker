@@ -1,27 +1,27 @@
 [
     {
         "data": {
-            "circulating_supply": 18580361861.0,
+            "circulating_supply": 18580367411.0,
             "id": 512,
-            "last_updated": 1528254548,
+            "last_updated": 1528255147,
             "max_supply": null,
             "name": "Stellar",
             "quotes": {
                 "BTC": {
-                    "market_cap": 715832.0,
-                    "percent_change_1h": 0.02,
-                    "percent_change_24h": -0.22,
-                    "percent_change_7d": 0.95,
-                    "price": 3.85263e-05,
-                    "volume_24h": 6290.9934714769
+                    "market_cap": 717333.0,
+                    "percent_change_1h": 0.27,
+                    "percent_change_24h": 0.04,
+                    "percent_change_7d": 1.16,
+                    "price": 3.86071e-05,
+                    "volume_24h": 6291.2547967642
                 },
                 "USD": {
-                    "market_cap": 5457126600.0,
-                    "percent_change_1h": -0.08,
-                    "percent_change_24h": 2.09,
-                    "percent_change_7d": 2.52,
-                    "price": 0.293704,
-                    "volume_24h": 47959200.0
+                    "market_cap": 5465879583.0,
+                    "percent_change_1h": 0.13,
+                    "percent_change_24h": 2.37,
+                    "percent_change_7d": 2.69,
+                    "price": 0.294175,
+                    "volume_24h": 47937600.0
                 }
             },
             "rank": 8,
@@ -31,42 +31,7 @@
         },
         "metadata": {
             "error": null,
-            "timestamp": 1528254348
-        }
-    },
-    {
-        "data": {
-            "circulating_supply": 18580361861.0,
-            "id": 512,
-            "last_updated": 1528254548,
-            "max_supply": null,
-            "name": "Stellar",
-            "quotes": {
-                "BTC": {
-                    "market_cap": 715832.0,
-                    "percent_change_1h": 0.02,
-                    "percent_change_24h": -0.22,
-                    "percent_change_7d": 0.95,
-                    "price": 3.85263e-05,
-                    "volume_24h": 6290.9934714769
-                },
-                "USD": {
-                    "market_cap": 5457126600.0,
-                    "percent_change_1h": -0.08,
-                    "percent_change_24h": 2.09,
-                    "percent_change_7d": 2.52,
-                    "price": 0.293704,
-                    "volume_24h": 47959200.0
-                }
-            },
-            "rank": 8,
-            "symbol": "XLM",
-            "total_supply": 104005988066.0,
-            "website_slug": "stellar"
-        },
-        "metadata": {
-            "error": null,
-            "timestamp": 1528254348
+            "timestamp": 1528255015
         }
     }
 ]

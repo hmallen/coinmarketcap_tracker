@@ -229,6 +229,8 @@ class TrackProduct:
 
 
 if __name__ == '__main__':
+    from multiprocessing import Process
+
     test_config_path = '../../TeslaBot/config/config.ini'
 
     test_slack_channel = 'testing'
@@ -241,10 +243,20 @@ if __name__ == '__main__':
 
     # (self, market, tracking_duration, slack_channel=None, slack_thread=None)
 
-    cmc_tracker.set_parameters(market=test_market, tracking_duration=4, slack_channel='testing')
+    cmc_tracker.set_parameters(market=test_market, tracking_duration=0.2, slack_channel='testing')
 
     try:
-        cmc_tracker.track_product(load_data=False)
+        #cmc_tracker.track_product(load_data=False)
+
+        keyword_arguments = {'load_data': False}
+
+        tracker_process = Process(target=cmc_tracker.track_product, kwargs=keyword_arguments)
+
+        tracker_process.start()
+
+        tracker_process.join()
+
+        logger.info('Done.')
 
     except Exception as e:
         logger.exception('Unhandled exception in main loop.')
