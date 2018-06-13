@@ -1,0 +1,4 @@
+C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python36_64\Lib\runpy.py:125: RuntimeWarning: 'heartbeatmonitor.monitor' found in sys.modules after import of package 'heartbeatmonitor', but prior to execution of 'heartbeatmonitor.monitor'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
+C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python36_64\Lib\runpy.py:125: RuntimeWarning: 'heartbeatmonitor.monitor' found in sys.modules after import of package 'heartbeatmonitor', but prior to execution of 'heartbeatmonitor.monitor'; this may result in unpredictable behaviour
+  warn(RuntimeWarning(msg))
