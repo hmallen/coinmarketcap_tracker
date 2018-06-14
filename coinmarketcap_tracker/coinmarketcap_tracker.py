@@ -548,6 +548,20 @@ class TrackProduct:
                                          timestamp_first=timestamp_first, timestamp_last=timestamp_last, timestamp_delta=timestamp_delta,
                                          duration_minutes=duration_minutes, duration_string=duration_string)
 
+                results_json = results['result'].copy()
+                del results_json['timestamp_delta']
+                del results_json['duration_string']
+
+                logger.info('Dumping final results to json file.')
+
+                if not os.path.exists('results/'):
+                    os.mkdir('results/')
+
+                results_file = 'results/' + self.trade_product + '-' + self.quote_product + '_' + dt_timestamp.strftime('%m%d%y_%H%M%S') + '.json'
+
+                with open(results_file, 'w', encoding='utf-8') as file:
+                    json.dump(results_json, file, indent=4, sort_keys=True, ensure_ascii=False)
+
             except Exception as e:
                 logger.exception('Exception while preparing final results from tracker.')
                 logger.exception(e)
