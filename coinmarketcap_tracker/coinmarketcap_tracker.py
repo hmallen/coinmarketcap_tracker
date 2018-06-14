@@ -128,7 +128,7 @@ class TrackProduct:
 
         try:
             TrackProduct.cmc_client.ticker(currency=self.trade_product, convert=self.quote_product)
-        
+
         except Exception as e:
             logger.exception('Unhandled exception while converting Coinmarketcap ticker data using quote product ' + self.quote_product + '.')
             logger.exception(e)
@@ -211,8 +211,8 @@ class TrackProduct:
 
             #logger.info('Slack channel for tracker alerts: #' + self.slack_channel_tracker +
                         #' (' + self.slack_channel_id_tracker + ')')
-            logger.info('Slack channel for tracker alerts: #' + self.slack_channel +
-                        ' (' + self.slack_channel_id_tracker + ')')
+            logger.info('Slack channel for tracker alerts: #' + str(self.slack_channel) +
+                        ' (' + str(self.slack_channel_id_tracker) + ')')
 
             self.slack_thread = slack_thread
 
