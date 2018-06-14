@@ -537,7 +537,7 @@ class TrackProduct:
                 rank_last = data_list[-1]['data']['rank']
                 logger.debug('rank_last: ' + str(rank_last))
 
-                rank_difference = rank_first - rank_first
+                rank_difference = rank_last - rank_first
                 logger.debug('rank_difference: ' + str(rank_difference))
 
                 results['result'] = dict(price_first=price_first, price_last=price_last, price_difference=price_difference,
