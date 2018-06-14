@@ -120,12 +120,6 @@ class TrackProduct:
         try:
             TrackProduct.cmc_client.ticker(currency=self.trade_product)
 
-        except TrackProduct.cmc_client.errors.CoinmarketcapError as e:
-            logger.error('Error while retrieving Coinmarketcap data for ' + self.trade_product + '.')
-            logger.error(e)
-
-            return False
-
         except Exception as e:
             logger.exception('Unhandled exception while retrieving Coinmarketcap data for ' + self.trade_product + '.')
             logger.exception(e)
@@ -134,13 +128,7 @@ class TrackProduct:
 
         try:
             TrackProduct.cmc_client.ticker(currency=self.trade_product, convert=self.quote_product)
-
-        except TrackProduct.cmc_client.errors.CoinmarketcapError as e:
-            logger.error('Error while converting Coinmarketcap ticker data using quote product ' + self.quote_product + '.')
-            logger.error(e)
-
-            return False
-
+        
         except Exception as e:
             logger.exception('Unhandled exception while converting Coinmarketcap ticker data using quote product ' + self.quote_product + '.')
             logger.exception(e)
