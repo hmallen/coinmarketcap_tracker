@@ -10,7 +10,7 @@ from heartbeatmonitor import Heartbeat
 from slackclient import SlackClient
 
 #logging.basicConfig()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)/
 logger.setLevel(logging.DEBUG)
 
 
@@ -146,6 +146,12 @@ class TrackProduct:
             os.makedirs(self.market_directory, exist_ok=True)
 
         self.cmc_data_file = self.market_directory + 'historical_data.json'
+
+        self.archive_directory = self.market_directory + 'archive/'
+
+        # Can combine this dir creation with one above since using os.makedirs()
+        if not os.path.exists(self.archive_directory):
+            os.makedirs(self.archive_directory, exist_ok=True)
 
         if self.slack_client != None:
             channel_list = self.slack_client.api_call('channels.list')
@@ -587,9 +593,13 @@ class TrackProduct:
                         market_data_archive = []
 
             else:
-                logger.info('Removing old json data file.')
+                #logger.info('Removing old json data file.')
 
-                os.remove(self.cmc_data_file)
+                #os.remove(self.cmc_data_file)
+
+                logger.warning('Tracker already running for this product. Exiting.')
+
+                sys.exit()
 
         if market_data_archive == []:
             with open(self.cmc_data_file, 'w', encoding='utf-8') as file:
@@ -720,6 +730,12 @@ class TrackProduct:
         except Exception as e:
             logger.exception('Exception while preparing and sending final tracking results.')
             logger.exception(e)
+
+        finally:
+            archive_file = self.archive_directory + self.cmc_data_file.split('/')[-1].split('.')[0] + '_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.json'
+
+            if os.path.exists(self.cmc_data_file):
+                shutil.move(self.cmc_data_file, archive_file)
 
         if self.heartbeat_monitor == True:
             logger.info('Disabling heartbeat.')
