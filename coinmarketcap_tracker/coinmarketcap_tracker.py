@@ -629,7 +629,12 @@ class TrackProduct:
 
                         market_data_archive.append(cmc_data)
 
-                        slack_message = format_slack_message(cmc_data, message_type='quote')
+                        slack_message = ''
+                        slack_message += '*_Started Coinmarketcap tracker for ' + cmc_data['data']['name'] + ' at ' + str(datetime.datetime.now()) + '._*\n'
+                        slack_message += '_Tracking product until ' + str(self.track_end_time) + '._\n\n'
+
+                        #slack_message = format_slack_message(cmc_data, message_type='quote')
+                        slack_message += format_slack_message(cmc_data, message_type='quote')
                         logger.debug('slack_message: ' + slack_message)
 
                         logger.debug('Sending Slack alert.')

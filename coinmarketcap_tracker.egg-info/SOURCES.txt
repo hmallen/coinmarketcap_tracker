@@ -1,9 +1,0 @@
-README.md
-setup.py
-coinmarketcap_tracker/__init__.py
-coinmarketcap_tracker/coinmarketcap_tracker.py
-coinmarketcap_tracker.egg-info/PKG-INFO
-coinmarketcap_tracker.egg-info/SOURCES.txt
-coinmarketcap_tracker.egg-info/dependency_links.txt
-coinmarketcap_tracker.egg-info/requires.txt
-coinmarketcap_tracker.egg-info/top_level.txt
