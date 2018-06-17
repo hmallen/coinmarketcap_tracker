@@ -569,7 +569,7 @@ class TrackProduct:
                 if not os.path.exists('results/'):
                     os.mkdir('results/')
 
-                results_file = 'results/' + self.trade_product + '-' + self.quote_product + '_' + dt_timestamp.strftime('%m%d%y_%H%M%S') + '.json'
+                results_file = self.market_directory + 'results/' + self.trade_product + '-' + self.quote_product + '_' + datetime.datetime.now().strftime('%m%d%y-%H%M%S') + '.json'
 
                 with open(results_file, 'w', encoding='utf-8') as file:
                     json.dump(results_json, file, indent=4, sort_keys=True, ensure_ascii=False)
@@ -685,6 +685,10 @@ class TrackProduct:
                     if new_data_ready == True:
                         slack_message = format_slack_message(cmc_data, message_type='quote')
                         logger.debug('slack_message: ' + slack_message)
+
+                        time_remaining = (self.track_end_time - datetime.datetime.now()) / datetime.timedelta(minutes=1)
+
+                        slack_message += '\n\n' + '*_Tracking time remaining:_* ' + "{:.2f}".format(time_remaining) + ' min'
 
                         logger.debug('Sending Slack alert.')
 
