@@ -10,7 +10,7 @@ import time
 from heartbeatmonitor import Heartbeat
 from slackclient import SlackClient
 
-#logging.basicConfig()
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -105,7 +105,7 @@ class TrackProduct:
             logger.info('Heartbeat monitor ready.')
 
 
-    def set_parameters(self, market, tracking_duration, slack_channel=None, slack_channel_id=None, slack_thread=None):
+    def set_parameters(self, market, tracking_duration, slack_channel=None, slack_channel_id=None, slack_thread=None, dedicated_channel=True):
         self.market_name = market
 
         self.trade_product = market.split('/')[0].upper()
@@ -117,6 +117,8 @@ class TrackProduct:
         #self.slack_channel_id = slack_channel_id
 
         self.slack_thread = slack_thread
+
+        self.dedicated_channel = dedicated_channel
 
         try:
             TrackProduct.cmc_client.ticker(currency=self.trade_product)
@@ -221,12 +223,16 @@ class TrackProduct:
             logger.info('Slack channel for tracker alerts: #' + str(self.slack_channel) +
                         ' (' + str(self.slack_channel_id_tracker) + ')')
 
-            self.slack_thread = slack_thread
+            if self.dedicated_channel == False:
+                self.slack_thread = slack_thread
+
+            else:
+                self.slack_thread = None
 
         return True
 
 
-    def send_slack_alert(self, channel_id, message, thread_id=None):
+    def send_slack_alert(self, channel_id, message, thread_id=None, broadcast=False):
         alert_return = {'Exception': False, 'result': None}
 
         try:
@@ -235,11 +241,10 @@ class TrackProduct:
                 channel=channel_id,
                 text=message,
                 username=self.slack_bot_user,
-                #icon_emoji=self.slack_bot_icon,
                 icon_url=self.slack_bot_icon,
                 thread_ts=thread_id,
-                reply_broadcast=True
-                #attachments=attachments
+                #reply_broadcast=True
+                thread_broadcast=broadcast
             )
 
         except Exception as e:
@@ -610,6 +615,8 @@ class TrackProduct:
 
         update_count = 0
 
+        new_data_ready = False
+
         loop_start = time.time()
 
         loop_count = 0
@@ -627,6 +634,8 @@ class TrackProduct:
                 if cmc_data['metadata']['error'] == None:
                     if loop_count > 1 and cmc_data['data']['last_updated'] > market_data_archive[-1]['data']['last_updated']:
                         update_count += 1
+
+                        new_data_ready = True
 
                         market_data_archive.append(cmc_data)
 
@@ -653,9 +662,13 @@ class TrackProduct:
                         alert_result = TrackProduct.send_slack_alert(self,
                                                                      channel_id=self.slack_channel_id_tracker,
                                                                      message=slack_message,
-                                                                     thread_id=self.slack_thread)
-
+                                                                     thread_id=self.slack_thread)#,
+                                                                     #broadcast=False)
                         logger.debug('alert_result: ' + str(alert_result))
+
+                        if alert_result['Exception'] == False and self.dedicated_channel == True:
+                            self.slack_thread = alert_result['result']['message']['ts']
+                            logger.debug('self.slack_thread: ' + str(self.slack_thread))
 
                         slack_message_last = time.time()
 
@@ -668,7 +681,8 @@ class TrackProduct:
                     logger.error('Error: ' + str(cmc_data['metadata']['error']))
 
                 if (time.time() - slack_message_last) > self.slack_alert_interval:
-                    if cmc_data['data']['last_updated'] > market_data_archive[-1]['data']['last_updated']:
+                    #if cmc_data['data']['last_updated'] > market_data_archive[-1]['data']['last_updated']:
+                    if new_data_ready == True:
                         slack_message = format_slack_message(cmc_data, message_type='quote')
                         logger.debug('slack_message: ' + slack_message)
 
@@ -677,11 +691,14 @@ class TrackProduct:
                         alert_result = TrackProduct.send_slack_alert(self,
                                                                      channel_id=self.slack_channel_id_tracker,
                                                                      message=slack_message,
-                                                                     thread_id=self.slack_thread)
+                                                                     thread_id=self.slack_thread,
+                                                                     broadcast=False)
 
                         logger.debug('alert_result: ' + str(alert_result))
 
                         slack_message_last = time.time()
+
+                        new_data_ready = False
 
                     else:
                         logger.debug('Slack alert ready, but no data update. Skipping.')
@@ -718,7 +735,8 @@ class TrackProduct:
 
                     message_result = TrackProduct.send_slack_alert(self,
                                                                    channel_id=self.slack_channel_id_tracker,
-                                                                   message=tracker_message, thread_id=self.slack_thread)
+                                                                   message=tracker_message, thread_id=self.slack_thread,
+                                                                   broadcast=True)
 
                     logger.debug('message_result: ' + str(message_result))
 
@@ -755,13 +773,13 @@ if __name__ == '__main__':
     #test_slack_channel_id = 'CAX1A4XU1'
 
     cmc_tracker = TrackProduct(loop_time=30, slack_alerts=True, slack_alert_interval=1,
-                               config_path=test_config_path, heartbeat_monitor=True)
+                               config_path=test_config_path, heartbeat_monitor=False)
 
     test_market = 'XLM/BTC'
 
     # (self, market, tracking_duration, slack_channel=None, slack_thread=None)
 
-    parameter_result = cmc_tracker.set_parameters(market=test_market, tracking_duration=0.1, slack_channel='testing')
+    parameter_result = cmc_tracker.set_parameters(market=test_market, tracking_duration=0.15, slack_channel='testing')
     logger.debug('parameter_result: ' + str(parameter_result))
 
     try:
