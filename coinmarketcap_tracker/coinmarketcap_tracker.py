@@ -10,7 +10,7 @@ import time
 from heartbeatmonitor import Heartbeat
 from slackclient import SlackClient
 
-#logging.basicConfig()
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -566,8 +566,8 @@ class TrackProduct:
 
                 logger.info('Dumping final results to json file.')
 
-                if not os.path.exists('results/'):
-                    os.mkdir('results/')
+                if not os.path.exists(self.market_directory + 'results/'):
+                    os.mkdir(self.market_directory + 'results/')
 
                 results_file = self.market_directory + 'results/' + self.trade_product + '-' + self.quote_product + '_' + datetime.datetime.now().strftime('%m%d%y-%H%M%S') + '.json'
 
