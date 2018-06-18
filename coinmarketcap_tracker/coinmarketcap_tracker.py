@@ -603,9 +603,15 @@ class TrackProduct:
 
                 #os.remove(self.cmc_data_file)
 
-                logger.warning('Tracker already running for this product. Exiting.')
+                #logger.warning('Tracker already running for this product. Exiting.')
 
-                sys.exit()
+                #sys.exit()
+
+                logger.warning('Tracker file already present. An error may have occurred. Archiving tracker file and starting fresh.')
+
+                cmc_data_file_archived = self.cmc_data_file.rstrip('.json') + '_OLD.json'
+
+                shutil.move(self.cmc_data_file, cmc_data_file_archived)
 
         if market_data_archive == []:
             with open(self.cmc_data_file, 'w', encoding='utf-8') as file:
