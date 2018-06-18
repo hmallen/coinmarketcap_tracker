@@ -701,8 +701,8 @@ class TrackProduct:
                         alert_result = TrackProduct.send_slack_alert(self,
                                                                      channel_id=self.slack_channel_id_tracker,
                                                                      message=slack_message,
-                                                                     thread_id=self.slack_thread,
-                                                                     broadcast=False)
+                                                                     thread_id=self.slack_thread)#,
+                                                                     #broadcast=False)
 
                         logger.debug('alert_result: ' + str(alert_result))
 
@@ -741,12 +741,13 @@ class TrackProduct:
                 logger.debug('tracker_results[\'result\']: ' + str(tracker_results['result']))
 
                 if tracker_results['Exception'] == False:
+                    tracker_message = '*_Final tracking results ready for ' + self.market + '._*\n\n'
                     tracker_message = format_slack_message(input_data=tracker_results['result'], message_type='final')
 
                     message_result = TrackProduct.send_slack_alert(self,
                                                                    channel_id=self.slack_channel_id_tracker,
-                                                                   message=tracker_message, thread_id=self.slack_thread,
-                                                                   broadcast=True)
+                                                                   message=tracker_message)#, thread_id=self.slack_thread,
+                                                                   #broadcast=True)
 
                     logger.debug('message_result: ' + str(message_result))
 
