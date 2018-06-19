@@ -741,7 +741,7 @@ class TrackProduct:
                 logger.debug('tracker_results[\'result\']: ' + str(tracker_results['result']))
 
                 if tracker_results['Exception'] == False:
-                    tracker_message = '*_Final tracking results ready for ' + self.market + '._*\n\n'
+                    tracker_message = '*_Final tracking results ready for ' + self.market_name + '._*\n\n'
                     tracker_message = format_slack_message(input_data=tracker_results['result'], message_type='final')
 
                     message_result = TrackProduct.send_slack_alert(self,
