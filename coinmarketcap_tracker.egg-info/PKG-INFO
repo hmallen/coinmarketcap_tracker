@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: coinmarketcap-tracker
+Version: 0.1.dev17
+Summary: Tracks Coinmarketcap data for selected cryptocurrency products over time and sends Slack alerts.
+Home-page: https://github.com/hmallen/coinmarketcap_tracker
+Author: Hunter M. Allen
+Author-email: allenhm@gmail.com
+License: MIT
+Description: # Coinmarketcap Tracker
+        
+        Tracks Coinmarketcap.com data for selected products over time.
+        
+        <b>To Do:</b>
+        - Check creation time of historical_data.json to make sure tracker actually running and not stuck/aborted
+        
+Keywords: coinmarketcap,tracker,slack
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
