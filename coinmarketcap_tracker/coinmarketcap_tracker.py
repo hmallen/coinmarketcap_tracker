@@ -617,6 +617,14 @@ class TrackProduct:
             with open(self.cmc_data_file, 'w', encoding='utf-8') as file:
                 json.dump(market_data_archive, file, indent=4, sort_keys=True, ensure_ascii=False)
 
+        # Check to see if valid data available from Coinmarketcap
+        cmc_data = TrackProduct.cmc_client.ticker(currency=self.trade_product, convert=self.quote_product)
+
+        if cmc_data['data']['quotes'][self.quote_product]['price'] == None:
+            logger.warning('No valid Coinmarketcap data available for ' + self.trade_product + '. Exiting.')
+
+            sys.exit()
+
         slack_message_last = 0
 
         update_count = 0
@@ -777,7 +785,7 @@ if __name__ == '__main__':
     import multiprocessing
     from multiprocessing import Process
 
-    test_config_path = '../../TeslaBot/config/config.ini'
+    test_config_path = '../../TeslaBot/config/config_tracker.ini'
 
     test_slack_channel = 'testing'
 
@@ -786,7 +794,7 @@ if __name__ == '__main__':
     cmc_tracker = TrackProduct(loop_time=30, slack_alerts=True, slack_alert_interval=1,
                                config_path=test_config_path, heartbeat_monitor=False)
 
-    test_market = 'XLM/BTC'
+    test_market = 'XVC/BTC'
 
     # (self, market, tracking_duration, slack_channel=None, slack_thread=None)
 
