@@ -1,3 +1,4 @@
 coinmarketcap_tracker/json/
 coinmarketcap_tracker/logs/
 coinmarketcap_tracker/results/
+config/*.ini
