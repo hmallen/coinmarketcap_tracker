@@ -11,7 +11,7 @@ from heartbeatmonitor import Heartbeat
 from pymongo import MongoClient
 from slackclient import SlackClient
 
-logging.basicConfig()
+#logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -83,17 +83,11 @@ class TrackProduct:
         if self.mongo == True:
             atlas_user = config['mongodb']['atlas_user']
             atlas_pass = config['mongodb']['atlas_pass']
-            atlas_uri = config['mongodb']['uri_atlas']
-            self.db_name = config['mongodb']['db_name']
-            self.collection_name = config['mongodb']['collection_name']
+            atlas_uri = config['mongodb']['atlas_uri']
 
-            self.url_atlas = 'mongodb+srv://' + atlas_user + ':' + atlas_pass + '@' + atlas_uri + self.db_name + '?retryWrites=true'
+            url_atlas = 'mongodb+srv://' + atlas_user + ':' + atlas_pass + '@' + atlas_uri
 
-            #self.db = MongoClient(self.url_atlas)[self.db_name][self.collection_name]
-
-            self.doc_id = None
-
-            self.mongo_doc = {}
+            self.db = MongoClient(url_atlas)
 
         self.heartbeat_monitor = heartbeat_monitor
 
@@ -157,22 +151,7 @@ class TrackProduct:
 
             return False
 
-        dt_start = datetime.datetime.now()
-
-        self.track_end_time = dt_start + datetime.timedelta(hours=tracking_duration)
-
-        if self.mongo == True:
-            self.mongo_doc['market'] = self.market_name
-            self.mongo_doc['trade_product'] = self.trade_product
-            self.mongo_doc['quote_product'] = self.quote_product
-            self.mongo_doc['start_time'] = dt_start
-            self.mongo_doc['duration'] = tracking_duration
-            self.mongo_doc['end_time'] = self.track_end_time
-            self.mongo_doc['results'] = {'data': [], 'final': None}
-            self.mongo_doc['status'] = ('Ready', None)
-
-            #self.doc_id = self.db.insert_one(self.mongo_doc).inserted_id
-            #logger.debug('self.doc_id: ' + str(self.doc_id))
+        self.track_end_time = datetime.datetime.now() + datetime.timedelta(hours=tracking_duration)
 
         #self.market_directory = self.json_directory + self.trade_product + '_' + self.quote_product + '_' + datetime.datetime.now().strftime('%m%d%Y_%H%M%S') + '/'
         self.market_directory = self.json_directory + self.trade_product + '_' + self.quote_product + '/'
@@ -192,10 +171,7 @@ class TrackProduct:
 
         if self.slack_client != None:
             channel_list = self.slack_client.api_call('channels.list')
-            logger.debug('channel_list: ' + str(channel_list))
-
             group_list = self.slack_client.api_call('groups.list')
-            logger.debug('group_list: ' + str(group_list))
 
             if slack_channel_id == None:
                 #self.slack_channel_tracker = slack_channel
@@ -598,23 +574,8 @@ class TrackProduct:
                                          duration_minutes=duration_minutes, duration_string=duration_string)
 
                 results_json = results['result'].copy()
-
                 del results_json['timestamp_delta']
                 del results_json['duration_string']
-
-                if self.mongo == True:
-                    logger.info('Updating MongoDB document with final results.')
-
-                    self.mongo_doc = self.db.find_one({'_id': self.doc_id})
-
-                    self.mongo_doc['results']['final'] = results_json
-
-                    self.mongo_doc['status'][0] = 'Pass'
-                    self.mongo_doc['status'][1] = 'Complete'
-
-                    update_result = self.db.update_one({'_id': self.doc_id}, {'$set': self.mongo_doc})
-                    logger.debug('update_result.matched_count: ' + str(update_result.matched_count))
-                    logger.debug('update_result.modified_count: ' + str(update_result.modified_count))
 
                 logger.info('Dumping final results to json file.')
 
@@ -636,11 +597,6 @@ class TrackProduct:
                 return results
 
 
-        self.db = MongoClient(self.url_atlas)[self.db_name][self.collection_name]
-
-        self.doc_id = self.db.insert_one(self.mongo_doc).inserted_id
-        logger.debug('self.doc_id: ' + str(self.doc_id))
-
         market_data_archive = []
 
         if os.path.exists(self.cmc_data_file):
@@ -656,6 +612,14 @@ class TrackProduct:
                         market_data_archive = []
 
             else:
+                #logger.info('Removing old json data file.')
+
+                #os.remove(self.cmc_data_file)
+
+                #logger.warning('Tracker already running for this product. Exiting.')
+
+                #sys.exit()
+
                 logger.warning('Tracker file already present. An error may have occurred. Archiving tracker file and starting fresh.')
 
                 cmc_data_file_archived = self.cmc_data_file.rstrip('.json') + '_OLD.json'
@@ -671,16 +635,6 @@ class TrackProduct:
 
         if cmc_data['data']['quotes'][self.quote_product]['price'] == None:
             logger.warning('No valid Coinmarketcap data available for ' + self.trade_product + '. Exiting.')
-
-            if self.mongo == True:
-                self.mongo_doc = self.db.find_one({'_id': self.doc_id})
-
-                self.mongo_doc['status'][0] = 'Fail'
-                self.mongo_doc['status'][1] = 'No valid data'
-
-                update_result = self.db.update_one({'_id': self.doc_id}, {'$set': self.mongo_doc})
-                logger.debug('update_result.matched_count: ' + str(update_result.matched_count))
-                logger.debug('update_result.modified_count: ' + str(update_result.modified_count))
 
             sys.exit()
 
@@ -712,17 +666,6 @@ class TrackProduct:
 
                         market_data_archive.append(cmc_data)
 
-                        if self.mongo == True:
-                            logger.info('Updating MongoDB document with new data.')
-
-                            self.mongo_doc = self.db.find_one({'_id': self.doc_id})
-
-                            self.mongo_doc['results']['data'] = market_data_archive
-
-                            update_result = self.db.update_one({'_id': self.doc_id}, {'$set': self.mongo_doc})
-                            logger.debug('update_result.matched_count: ' + str(update_result.matched_count))
-                            logger.debug('update_result.modified_count: ' + str(update_result.modified_count))
-
                         logger.debug('Dumping Coinmarketcap data to json file.')
 
                         with open(self.cmc_data_file, 'w', encoding='utf-8') as file:
@@ -732,17 +675,6 @@ class TrackProduct:
                         update_count += 1
 
                         market_data_archive.append(cmc_data)
-
-                        if self.mongo == True:
-                            logger.info('Updating MongoDB document with first data point.')
-
-                            self.mongo_doc = self.db.find_one({'_id': self.doc_id})
-
-                            self.mongo_doc['results']['data'] = market_data_archive
-
-                            update_result = self.db.update_one({'_id': self.doc_id}, {'$set': self.mongo_doc})
-                            logger.debug('update_result.matched_count: ' + str(update_result.matched_count))
-                            logger.debug('update_result.modified_count: ' + str(update_result.modified_count))
 
                         slack_message = ''
                         slack_message += '*_Started Coinmarketcap tracker for ' + cmc_data['data']['name'] + ' at ' + str(datetime.datetime.now()) + '._*\n'
@@ -873,13 +805,13 @@ if __name__ == '__main__':
     #test_slack_channel_id = 'CAX1A4XU1'
 
     cmc_tracker = TrackProduct(loop_time=30, slack_alerts=True, slack_alert_interval=1,
-                               config_path=test_config_path, heartbeat_monitor=False, mongo=True)
+                               config_path=test_config_path, heartbeat_monitor=False)
 
-    test_market = 'XLM/BTC'
+    test_market = 'XVC/BTC'
 
     # (self, market, tracking_duration, slack_channel=None, slack_thread=None)
 
-    parameter_result = cmc_tracker.set_parameters(market=test_market, tracking_duration=0.15, slack_channel=test_slack_channel)
+    parameter_result = cmc_tracker.set_parameters(market=test_market, tracking_duration=0.15, slack_channel='testing')
     logger.debug('parameter_result: ' + str(parameter_result))
 
     try:
