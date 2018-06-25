@@ -612,7 +612,7 @@ class TrackProduct:
                     self.mongo_doc['status'][0] = 'Pass'
                     self.mongo_doc['status'][1] = 'Complete'
 
-                    update_result = self.db.update_one({'_id': self.doc_id}, self.mongo_doc)
+                    update_result = self.db.update_one({'_id': self.doc_id}, {'$set': self.mongo_doc})
                     logger.debug('update_result.matched_count: ' + str(update_result.matched_count))
                     logger.debug('update_result.modified_count: ' + str(update_result.modified_count))
 
@@ -673,7 +673,7 @@ class TrackProduct:
                 self.mongo_doc['status'][0] = 'Fail'
                 self.mongo_doc['status'][1] = 'No valid data'
 
-                update_result = self.db.update_one({'_id': self.doc_id}, self.mongo_doc)
+                update_result = self.db.update_one({'_id': self.doc_id}, {'$set': self.mongo_doc})
                 logger.debug('update_result.matched_count: ' + str(update_result.matched_count))
                 logger.debug('update_result.modified_count: ' + str(update_result.modified_count))
 
@@ -714,7 +714,7 @@ class TrackProduct:
 
                             self.mongo_doc['results']['data'] = market_data_archive
 
-                            update_result = self.db.update_one({'_id': self.doc_id}, self.mongo_doc)
+                            update_result = self.db.update_one({'_id': self.doc_id}, {'$set': self.mongo_doc})
                             logger.debug('update_result.matched_count: ' + str(update_result.matched_count))
                             logger.debug('update_result.modified_count: ' + str(update_result.modified_count))
 
@@ -735,7 +735,7 @@ class TrackProduct:
 
                             self.mongo_doc['results']['data'] = market_data_archive
 
-                            update_result = self.db.update_one({'_id': self.doc_id}, self.mongo_doc)
+                            update_result = self.db.update_one({'_id': self.doc_id}, {'$set': self.mongo_doc})
                             logger.debug('update_result.matched_count: ' + str(update_result.matched_count))
                             logger.debug('update_result.modified_count: ' + str(update_result.modified_count))
 
