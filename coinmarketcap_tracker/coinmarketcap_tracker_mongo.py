@@ -84,12 +84,12 @@ class TrackProduct:
             atlas_user = config['mongodb']['atlas_user']
             atlas_pass = config['mongodb']['atlas_pass']
             atlas_uri = config['mongodb']['uri_atlas']
-            db_name = config['mongodb']['db_name']
-            collection_name = config['mongodb']['collection_name']
+            self.db_name = config['mongodb']['db_name']
+            self.collection_name = config['mongodb']['collection_name']
 
-            url_atlas = 'mongodb+srv://' + atlas_user + ':' + atlas_pass + '@' + atlas_uri + db_name + '?retryWrites=true'
+            self.url_atlas = 'mongodb+srv://' + atlas_user + ':' + atlas_pass + '@' + atlas_uri + db_name + '?retryWrites=true'
 
-            self.db = MongoClient(url_atlas)[db_name][collection_name]
+            #self.db = MongoClient(self.url_atlas)[self.db_name][self.collection_name]
 
             self.doc_id = None
 
@@ -171,8 +171,8 @@ class TrackProduct:
             self.mongo_doc['results'] = {'data': [], 'final': None}
             self.mongo_doc['status'] = ('ready', None)
 
-            self.doc_id = self.db.insert_one(self.mongo_doc).inserted_id
-            logger.debug('self.doc_id: ' + str(self.doc_id))
+            #self.doc_id = self.db.insert_one(self.mongo_doc).inserted_id
+            #logger.debug('self.doc_id: ' + str(self.doc_id))
 
         #self.market_directory = self.json_directory + self.trade_product + '_' + self.quote_product + '_' + datetime.datetime.now().strftime('%m%d%Y_%H%M%S') + '/'
         self.market_directory = self.json_directory + self.trade_product + '_' + self.quote_product + '/'
@@ -635,6 +635,11 @@ class TrackProduct:
             finally:
                 return results
 
+
+        self.db = MongoClient(self.url_atlas)[self.db_name][self.collection_name]
+
+        self.doc_id = self.db.insert_one(self.mongo_doc).inserted_id
+        logger.debug('self.doc_id: ' + str(self.doc_id))
 
         market_data_archive = []
 
