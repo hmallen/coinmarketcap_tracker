@@ -11,7 +11,7 @@ from heartbeatmonitor import Heartbeat
 from pymongo import MongoClient
 from slackclient import SlackClient
 
-logging.basicConfig()
+#logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
