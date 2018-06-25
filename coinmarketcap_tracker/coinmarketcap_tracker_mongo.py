@@ -169,7 +169,7 @@ class TrackProduct:
             self.mongo_doc['duration'] = tracking_duration
             self.mongo_doc['end_time'] = self.track_end_time
             self.mongo_doc['results'] = {'data': [], 'final': None}
-            self.mongo_doc['status'] = ('ready', None)
+            self.mongo_doc['status'] = ('Ready', None)
 
             #self.doc_id = self.db.insert_one(self.mongo_doc).inserted_id
             #logger.debug('self.doc_id: ' + str(self.doc_id))
@@ -607,7 +607,7 @@ class TrackProduct:
 
                     self.mongo_doc = self.db.find_one({'_id': self.doc_id})
 
-                    self.mongo_doc['results']['final'] = results['result']
+                    self.mongo_doc['results']['final'] = results_json
 
                     self.mongo_doc['status'][0] = 'Pass'
                     self.mongo_doc['status'][1] = 'Complete'
