@@ -87,7 +87,7 @@ class TrackProduct:
             self.db_name = config['mongodb']['db_name']
             self.collection_name = config['mongodb']['collection_name']
 
-            self.url_atlas = 'mongodb+srv://' + atlas_user + ':' + atlas_pass + '@' + atlas_uri + db_name + '?retryWrites=true'
+            self.url_atlas = 'mongodb+srv://' + atlas_user + ':' + atlas_pass + '@' + atlas_uri + self.db_name + '?retryWrites=true'
 
             #self.db = MongoClient(self.url_atlas)[self.db_name][self.collection_name]
 
