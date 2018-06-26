@@ -124,7 +124,8 @@ class TrackProduct:
             logger.info('Heartbeat monitor ready.')
 
 
-    def set_parameters(self, market, tracking_duration, slack_channel=None, slack_channel_id=None, slack_thread=None, dedicated_channel=True):
+    def set_parameters(self, market, tracking_duration, slack_channel=None, slack_channel_id=None, slack_thread=None,
+                       dedicated_channel=True, analysis_parameters=None):
         self.market_name = market
 
         self.trade_product = market.split('/')[0].upper()
@@ -138,6 +139,8 @@ class TrackProduct:
         self.slack_thread = slack_thread
 
         self.dedicated_channel = dedicated_channel
+
+        #self.analysis_parameters = analysis_parameters
 
         try:
             TrackProduct.cmc_client.ticker(currency=self.trade_product)
@@ -170,11 +173,8 @@ class TrackProduct:
             self.mongo_doc['end_time'] = self.track_end_time
             self.mongo_doc['results'] = {'data': [], 'final': None}
             self.mongo_doc['status'] = ('Ready', None)
+            self.mongo_doc['analysis_parameters'] = analysis_parameters
 
-            #self.doc_id = self.db.insert_one(self.mongo_doc).inserted_id
-            #logger.debug('self.doc_id: ' + str(self.doc_id))
-
-        #self.market_directory = self.json_directory + self.trade_product + '_' + self.quote_product + '_' + datetime.datetime.now().strftime('%m%d%Y_%H%M%S') + '/'
         self.market_directory = self.json_directory + self.trade_product + '_' + self.quote_product + '/'
 
         if not os.path.exists(self.market_directory):
